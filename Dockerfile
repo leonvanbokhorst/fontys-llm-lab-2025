@@ -5,22 +5,26 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip git cron && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv and then use it for Python packages
+# Install uv
 RUN pip3 install uv
-RUN uv pip install --system vllm transformers datasets peft bitsandbytes accelerate wandb jupyterlab notebook huggingface_hub pynvml jupyterlab-git
-
-# JupyterLab Git extension (already installed via uv pip)
-# RUN pip3 install jupyterlab-git # No longer needed
-RUN jupyter labextension install @jupyterlab/git
 
 # Create work directory
 RUN mkdir /app
 WORKDIR /app
 
+# Copy pyproject.toml and install Python dependencies using uv
+COPY pyproject.toml .
+RUN uv pip install --system .
+
+# JupyterLab Git extension
+# The jupyterlab-git Python package is installed via pyproject.toml by the command above.
+# This command builds the JupyterLab extension.
+RUN jupyter labextension install @jupyterlab/git
+
 # Expose ports (JupyterLab + REST API)
 EXPOSE 8000 8888
 
-# Environment variables (can be filled dynamically later)
+# Environment variables (can be filled dynamically later or during docker run)
 ENV MODEL_NAME="/app/models/default-model"
 ENV WANDB_API_KEY=""
 ENV WANDB_MODE="online"
@@ -33,8 +37,8 @@ RUN echo "* * * * * root /app/check_gpu_usage.sh" > /etc/cron.d/gpucheck
 RUN chmod 0644 /etc/cron.d/gpucheck && crontab /etc/cron.d/gpucheck
 
 # Start JupyterLab and vLLM REST API
-CMD ["bash", "-c", "\
-    service cron start && \
-    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & \
-    python3 -m vllm.entrypoints.api_server --model ${MODEL_NAME} --host 0.0.0.0 --port 8000 --dtype auto \
+CMD ["bash", "-c", "\\
+    service cron start && \\
+    jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root & \\
+    python3 -m vllm.entrypoints.api_server --model ${MODEL_NAME} --host 0.0.0.0 --port 8000 --dtype auto \\
     "]

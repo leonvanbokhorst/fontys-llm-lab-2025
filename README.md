@@ -1,11 +1,45 @@
 # Project Title
 
-A brief description of this project. This setup provides a Dockerized environment for LLM experimentation, including JupyterLab and a vLLM API server.
+A brief description of this project. This setup provides a Dockerized environment for LLM experimentation, including JupyterLab and a vLLM API server, using `uv` for fast Python package management via `pyproject.toml`.
 
 ## Prerequisites
 
 - Docker
 - NVIDIA GPU drivers (if using GPUs)
+
+## Project Structure
+
+- `Dockerfile`: Defines the Docker image.
+- `pyproject.toml`: Specifies Python project metadata and dependencies, managed by `uv`.
+- `check_gpu_usage.sh`: A script for monitoring GPU usage (copied into the image).
+- `README.md`: This file.
+
+## `pyproject.toml`
+
+This file manages the Python dependencies for the project. `uv` uses this file to install the required packages.
+
+```toml
+[project]
+name = "fontys-llm-lab"
+version = "0.1.0"
+description = "Dockerized environment for LLM experimentation with vLLM and JupyterLab."
+
+[project.dependencies]
+dependencies = [
+    "vllm",
+    "transformers",
+    "datasets",
+    "peft",
+    "bitsandbytes",
+    "accelerate",
+    "wandb",
+    "jupyterlab",
+    "notebook",
+    "huggingface_hub",
+    "pynvml",
+    "jupyterlab-git"
+]
+```
 
 ## Dockerfile Contents
 
@@ -19,22 +53,27 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip git cron && \
     rm -rf /var/lib/apt/lists/*
 
-# Install uv and then use it for Python packages
+# Install uv
 RUN pip3 install uv
-RUN uv pip install --system vllm transformers datasets peft bitsandbytes accelerate wandb jupyterlab notebook huggingface_hub pynvml jupyterlab-git
-
-# JupyterLab Git extension (installed via uv pip, labextension still needs to be built)
-RUN jupyter labextension install @jupyterlab/git
 
 # Create work directory
 RUN mkdir /app
 WORKDIR /app
 
+# Copy pyproject.toml and install Python dependencies using uv
+COPY pyproject.toml .
+RUN uv pip install --system .
+
+# JupyterLab Git extension
+# The jupyterlab-git Python package is installed via pyproject.toml by the command above.
+# This command builds the JupyterLab extension.
+RUN jupyter labextension install @jupyterlab/git
+
 # Expose ports (JupyterLab + REST API)
 EXPOSE 8000 8888
 
 # Environment variables (can be filled dynamically later or during docker run)
-ENV MODEL_NAME="/app/models/default-model" # Default model, can be overridden
+ENV MODEL_NAME="/app/models/default-model"
 ENV WANDB_API_KEY=""
 ENV WANDB_MODE="online"
 ENV HUGGINGFACE_TOKEN=""

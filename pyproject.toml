@@ -1,0 +1,20 @@
+[project]
+name = "fontys-llm-lab"
+version = "0.1.0"
+description = "Dockerized environment for LLM experimentation with vLLM and JupyterLab."
+
+[project.dependencies]
+dependencies = [
+    "vllm",
+    "transformers",
+    "datasets",
+    "peft",
+    "bitsandbytes",
+    "accelerate",
+    "wandb",
+    "jupyterlab",
+    "notebook",
+    "huggingface_hub",
+    "pynvml",
+    "jupyterlab-git"
+] 
