@@ -19,12 +19,11 @@ RUN apt-get update && \
     apt-get install -y python3 python3-pip git cron && \
     rm -rf /var/lib/apt/lists/*
 
-# Pip upgrade & essentials
-RUN pip3 install --upgrade pip
-RUN pip3 install vllm transformers datasets peft bitsandbytes accelerate wandb jupyterlab notebook huggingface_hub pynvml
+# Install uv and then use it for Python packages
+RUN pip3 install uv
+RUN uv pip install --system vllm transformers datasets peft bitsandbytes accelerate wandb jupyterlab notebook huggingface_hub pynvml jupyterlab-git
 
-# JupyterLab Git integration
-RUN pip3 install jupyterlab-git
+# JupyterLab Git extension (installed via uv pip, labextension still needs to be built)
 RUN jupyter labextension install @jupyterlab/git
 
 # Create work directory
@@ -119,3 +118,9 @@ The following environment variables can be set when running the Docker container
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## Little Padawan
+
+This project is a work in progress. Padawan is still learning how to use Docker and vLLM.
+
+![katana-through-bamboo](katana-through-bamboo.png)
