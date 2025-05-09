@@ -102,7 +102,7 @@ def parse_arguments():
     parser.add_argument(
         "--num_train_epochs",
         type=int,
-        default=1,  # Let's start with one lap around the training track.
+        default=3,  # Let's try for three laps now!
         help="Total number of training epochs to perform.",
     )
     parser.add_argument(
