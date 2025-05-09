@@ -1,0 +1,13 @@
+.venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.egg-info/
+*.dist-info/
+*.build-info/
+
+fine_tuned_model_dojo/

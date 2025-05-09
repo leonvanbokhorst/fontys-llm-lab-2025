@@ -1,0 +1,45 @@
+[project]
+name = "fontys-llm-lab-2025"
+version = "0.1.0"
+description = "A Lonn-San and Padawan project for QLoRA fine-tuning, dataset generation, and Streamlit adventures!"
+readme = "README.md" # We shall create this noble scroll later!
+requires-python = ">=3.10" # A good modern Python version
+
+dependencies = [
+    "accelerate>=0.29.0",    # For efficient training
+    "bitsandbytes>=0.43.0",  # For 8-bit and 4-bit quantization (QLoRA magic)
+    "datasets>=2.18.0",      # For handling our precious persona data
+    "peft>=0.10.0",          # Parameter-Efficient Fine-Tuning
+    "protobuf",              # Often a dependency for other packages
+    "python-dotenv>=1.0.0",  # For managing environment variables (like API keys)
+    "sentencepiece",         # For tokenizers used by models like Mistral
+    "torch>=2.1.0",          # The heart of our deep learning
+    "transformers>=4.38.0",  # Hugging Face's magic wand for models and tokenizers
+    "wandb",                 # For logging our training progress and discoveries
+    "streamlit",             # For our grand finale: the interactive UI!
+    "litellm>=1.0.0",        # For unified LLM API access during data generation
+    # For data generation, we might need specific API clients, e.g.:
+    # "openai",
+    # "anthropic",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff", # A swift linter and formatter!
+]
+
+[project.urls]
+Homepage = "https://github.com/leonvanbokhorst/fontys-llm-lab-2025" # Placeholder for now
+Repository = "https://github.com/leonvanbokhorst/fontys-llm-lab-2025" # Placeholder for now
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "UP", "PL", "T20"] # A good selection of rules
+ignore = ["E501"] # Let black handle line length formatting mostly
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.setuptools.packages.find]
+where = ["."] # Assuming our code will be in the root or subdirectories 
