@@ -1,5 +1,7 @@
 import argparse
 import torch
+import os
+from dotenv import load_dotenv
 from transformers import (
     AutoModelForCausalLM, 
     AutoTokenizer, 
@@ -102,7 +104,7 @@ def parse_arguments():
     parser.add_argument(
         "--num_train_epochs",
         type=int,
-        default=3,  # Let's try for three laps now!
+        default=2,  # Optimal number of epochs based on previous runs.
         help="Total number of training epochs to perform.",
     )
     parser.add_argument(
@@ -124,6 +126,18 @@ def main_training_ritual(args):
     """The core function where the model learns and evolves.
     Currently, a tranquil meditation spot awaiting your fine-tuning incantations.
     """
+    # Load environment variables from .env file
+    load_dotenv()
+    hf_username = os.getenv("HF_USERNAME")
+    hf_token = os.getenv("HUGGINGFACE_API_KEY")
+    wandb_api_key = os.getenv("WANDB_API_KEY")
+
+    # Define a model name for Hugging Face Hub and W&B run name
+    # You can customize this further if needed, Lonn-San!
+    base_model_name = args.model_name_or_path.split("/")[-1] # e.g., "Phi-4-mini-instruct"
+    hub_model_id_template = f"{hf_username}/{base_model_name}-persona-qlora" if hf_username else None
+    wandb_run_name = f"{base_model_name}-persona-qlora-training"
+
     print(f"🧘 Initiating training with model: {args.model_name_or_path}")
     print(f"💾 Outputting to: {args.output_dir}")
 
@@ -367,6 +381,27 @@ def main_training_ritual(args):
 
     # TODO: Step 4: Define Training Arguments. The rules of the dojo!
     print("📜 Defining Training Arguments...")
+    
+    # Prepare for Hugging Face Hub push and W&B logging
+    push_to_hub_enabled = False
+    hub_model_id_actual = None
+    if hf_username and hf_token:
+        push_to_hub_enabled = True
+        hub_model_id_actual = hub_model_id_template
+        print(f"✅ Hugging Face Hub push enabled. Model ID: {hub_model_id_actual}")
+    else:
+        print("⚠️ Hugging Face Hub push disabled: HF_USERNAME or HUGGINGFACE_API_KEY not found in environment.")
+
+    report_to_wandb = "none"
+    if wandb_api_key:
+        report_to_wandb = "wandb"
+        print(f"✅ Weights & Biases logging enabled. Run name: {wandb_run_name}")
+        # Note: W&B project name can be set via environment variable WANDB_PROJECT
+        # or you can add an argument for it if you prefer more explicit control.
+        # For now, it will use the default project or one set by WANDB_PROJECT env var.
+    else:
+        print("⚠️ Weights & Biases logging disabled: WANDB_API_KEY not found in environment.")
+
     training_args = TrainingArguments(
         output_dir=args.output_dir,
         num_train_epochs=args.num_train_epochs,
@@ -386,9 +421,15 @@ def main_training_ritual(args):
         gradient_accumulation_steps=1, # Accumulate gradients (effective batch size = N * per_device_batch_size)
         lr_scheduler_type="cosine", # Cosine learning rate scheduler
         warmup_ratio=0.03,          # Warmup ratio for the scheduler
-        report_to="none", # Disable external reporting (wandb, tensorboard) for now
+        report_to=report_to_wandb, # report_to="wandb" or "none"
         remove_unused_columns=False, # Keep all columns from the dataset; after preprocessing, only relevant ones exist
         # ddp_find_unused_parameters=False, # Set to False if not using DDP or if encountering issues
+        push_to_hub=push_to_hub_enabled,
+        hub_model_id=hub_model_id_actual,
+        hub_token=hf_token, # Pass the token for push_to_hub
+        # run_name=wandb_run_name, # Set run name for W&B if enabled (and supported directly by TrainingArguments)
+                                  # Alternatively, W&B picks up run names through env vars or its own init.
+                                  # If WANDB_RUN_NAME is set, it will be used.
     )
     print(f"🏋️ TrainingArguments defined: {training_args}")
 

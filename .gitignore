@@ -10,4 +10,8 @@ __pycache__/
 *.dist-info/
 *.build-info/
 
+# Ignore all files in the fine_tuned_model_dojo directory
 fine_tuned_model_dojo/
+
+# Ignore all files in the wandb directory
+wandb/
