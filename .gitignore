@@ -1,4 +1,5 @@
 .venv/
+.env
 __pycache__/
 *.pyc
 *.pyo
@@ -9,3 +10,4 @@ __pycache__/
 *.dist-info/
 *.build-info/
 
+fine_tuned_model_dojo/
