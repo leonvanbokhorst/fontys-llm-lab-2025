@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+pip-wheel-metadata/
+.pytest_cache/
+.mypy_cache/
+.coverage
+.hypothesis/
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+# (uv creates .venv inside the container, but this is good practice if local venvs exist)
+
+# Build artifacts
+build/
+dist/
+wheels/
+*.egg
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Secrets - ensure these are handled via environment variables or Docker secrets
+.env
+secrets/
+*.pem
+*.key 

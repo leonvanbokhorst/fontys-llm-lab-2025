@@ -1,0 +1,19 @@
+version: '3.9' # Specifying the ancient scripture version for Docker Compose.
+
+services: # Here we define the loyal services (containers) for our dojo.
+  mistral-finetune: # The name of our star pupil, the Mistral Finetuning service.
+    image: leonvanbokhorst/mistral-qlora:latest # The sacred Docker image it uses, forged by Master Lonn-San.
+    runtime: nvidia # Requesting the power of Nvidia GPUs, for heavy scrolls (AI computations).
+    volumes:
+      # Mounting the Huggingface cache, so we don't re-download ancient texts every time.
+      # Like a library card that remembers all the scrolls you've borrowed!
+      - huggingface_cache:/app/.cache/huggingface
+    environment:
+      # Setting up secret runes (environment variables).
+      - HF_TOKEN=<huggingface_token> # Your Huggingface secret handshake (token), if the scrolls demand it.
+    command: [] # Any extra commands or arguments to pass to the container at launch, like specific training mantras.
+                  # Example: ["--model_size", "7b", "--epochs", "3"]
+
+volumes:
+  huggingface_cache: # Defining the named scroll-storage (volume) for our Huggingface cache.
+                     # This ensures it persists even if the container takes a brief nap.
