@@ -1,5 +1,5 @@
 [project]
-name = "mistral-qlora-journey"
+name = "fontys-llm-lab-2025"
 version = "0.1.0"
 description = "A Lonn-San and Padawan project for QLoRA fine-tuning, dataset generation, and Streamlit adventures!"
 readme = "README.md" # We shall create this noble scroll later!
@@ -17,6 +17,7 @@ dependencies = [
     "transformers>=4.38.0",  # Hugging Face's magic wand for models and tokenizers
     "wandb",                 # For logging our training progress and discoveries
     "streamlit",             # For our grand finale: the interactive UI!
+    "litellm>=1.0.0",        # For unified LLM API access during data generation
     # For data generation, we might need specific API clients, e.g.:
     # "openai",
     # "anthropic",

@@ -1,6 +1,7 @@
 import argparse
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments, Trainer
+from datasets import load_dataset
 
 # Oh, and maybe a dash of PEFT for that QLoRA goodness later?
 # from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
@@ -19,13 +20,13 @@ def parse_arguments():
     parser.add_argument(
         "--model_name_or_path",
         type=str,
-        default="mistralai/Mistral-7B-v0.1",  # A sensible default, but choose your fighter!
+        default="microsoft/phi-3-mini-4k-instruct",  # Our new default: the swift Phi-3 Mini!
         help="Path to pretrained model or model identifier from Hugging Face Hub.",
     )
     parser.add_argument(
         "--dataset_name_or_path",
         type=str,
-        # default="your_favorite_dataset_here", # TODO: Master Lonn-San, guide us to the sacred data!
+        default="persona_data/zen_coder_generated.jsonl", # Path to our Zen Coder data!
         help="Path to dataset or dataset identifier from Hugging Face Hub / local path.",
     )
     parser.add_argument(
@@ -63,16 +64,37 @@ def main_training_ritual(args):
     print(f"💾 Outputting to: {args.output_dir}")
 
     # TODO: Step 1: Load the tokenizer, like finding the right calligraphy brush.
-    # tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
-    # if tokenizer.pad_token is None:
-    #     tokenizer.pad_token = tokenizer.eos_token # Common practice for autoregressive models
+    print(f"🖌️ Loading tokenizer for model: {args.model_name_or_path}")
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path)
+        if tokenizer.pad_token is None:
+            print("PAD_TOKEN not found, setting to EOS_TOKEN. Common for autoregressive models.")
+            tokenizer.pad_token = tokenizer.eos_token
+        print(f"Tokenizer loaded successfully. Pad token: {tokenizer.pad_token}, EOS token: {tokenizer.eos_token}")
+        print(f"Special tokens map: {tokenizer.special_tokens_map}")
+        # You might also want to inspect: tokenizer.vocab_size
+    except Exception as e:
+        print(f"😭 Oh dear! Failed to load tokenizer: {e}")
+        print("Ensure the model name is correct and you have an internet connection if downloading.")
+        return # Exit early if tokenizer loading fails
 
     # TODO: Step 2: Load the model. Is it a mighty pre-trained sensei or a fresh apprentice?
-    # model = AutoModelForCausalLM.from_pretrained(
-    #     args.model_name_or_path,
-    #     # torch_dtype=torch.bfloat16, # For faster training on compatible GPUs!
-    #     # device_map="auto" # Let the Hugging Face spirits decide GPU allocation.
-    # )
+    print(f"🧘 Summoning the model: {args.model_name_or_path}")
+    try:
+        model = AutoModelForCausalLM.from_pretrained(
+            args.model_name_or_path,
+            torch_dtype=torch.bfloat16, # Use bfloat16 for faster training on compatible GPUs
+            device_map="auto"           # Automatically map model to available devices
+            # trust_remote_code=True # Phi-3 might need this if not using the latest transformers
+        )
+        print(f"✅ Model loaded successfully! It's on device: {model.device}")
+        print(f"Model configuration: {model.config}")
+
+    except Exception as e:
+        print(f"😭 Alas! Failed to load model: {e}")
+        print("Things to check: model name, internet connection, GPU memory (if using CUDA).")
+        print("If it's a new model like Phi-3, you might need 'trust_remote_code=True' or a transformers library update.")
+        return # Exit early if model loading fails
 
     # TODO: Step 2.5 (For QLoRA/PEFT): Prepare model for k-bit training and apply LoRA config.
     # model = prepare_model_for_kbit_training(model)
@@ -81,7 +103,23 @@ def main_training_ritual(args):
     # model.print_trainable_parameters() # See how much we're actually training - efficiency is key!
 
     # TODO: Step 3: Load and preprocess the dataset. What wisdom will our model learn?
-    # train_dataset = ...
+    print(f"WISDOM SEEKING: Attempting to load dataset from: {args.dataset_name_or_path}")
+    try:
+        raw_datasets = load_dataset("json", data_files=args.dataset_name_or_path)
+        print(f"📚 Dataset loaded successfully! Content: {raw_datasets}")
+        # For a .jsonl file, Hugging Face datasets usually creates a 'train' split by default.
+        # Let's inspect the first example from the 'train' split if it exists.
+        if "train" in raw_datasets:
+            print(f"🔍 First example from train split: {raw_datasets['train'][0]}")
+        else:
+            print("Could not find a 'train' split in the loaded dataset.")
+
+    except Exception as e:
+        print(f"😭 Oh no! Failed to load dataset: {e}")
+        print("Please ensure the path is correct and the file is a valid JSONL.")
+        # We should probably exit or handle this more gracefully in a real script
+        return # Exit early if dataset loading fails
+
     # eval_dataset = ... (Optional, but good for checking progress!)
 
     # TODO: Step 4: Define Training Arguments. The rules of the dojo!
@@ -115,9 +153,6 @@ def main_training_ritual(args):
         "\\n📜 This Padawan has laid the groundwork. The main training ritual awaits your masterful touch, Lonn-San! 📜"
     )
     print("Consider uncommenting and filling in the TODO sections above.")
-    print(
-        "You might need to install: pip install torch transformers datasets accelerate peft bitsandbytes"
-    )
 
 
 # --- Script Execution Gateway ---
