@@ -104,13 +104,13 @@ def parse_arguments():
     parser.add_argument(
         "--num_train_epochs",
         type=int,
-        default=2,  # Optimal number of epochs based on previous runs.
+        default=1,  # Optimal number of epochs based on previous runs.
         help="Total number of training epochs to perform.",
     )
     parser.add_argument(
         "--per_device_train_batch_size",
         type=int,
-        default=4,  # How many scrolls to read at once, per GPU sensei.
+        default=1,  # How many scrolls to read at once, per GPU sensei.
         help="Batch size per GPU/CPU for training.",
     )
     # TODO: Add more arguments as needed, Master! Learning rate, LoRA configs, etc.
